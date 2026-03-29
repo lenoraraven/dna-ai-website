@@ -1,34 +1,35 @@
 import streamlit as st
 import joblib
 
-# 1. Load the "Strict" Final Brain and Dictionary
-# Make sure these filenames match exactly what you uploaded to GitHub!
-model = joblib.load('dna_model_v5.pkl')
-cv = joblib.load('vectorizer_v5.pkl')
+# 1. Load the "V6" Balanced Brain and Dictionary
+model = joblib.load('dna_model_v6.pkl')
+cv = joblib.load('vectorizer_v6.pkl')
 
 st.set_page_config(page_title="DNA Promoter AI", page_icon="🧬")
 
-st.title("🧬 Level 4: Strict DNA Detector")
-st.write("This version is trained to ignore 'Junk DNA' like repeated sequences.")
+st.title("🧬 Final: Goldilocks DNA Detector")
+st.write("Balanced version: Optimized to find real signals while ignoring junk.")
 
-# 2. The 6-mer function (Must match the training code)
-def get_kmers(sequence, size=6):
-    # .lower() ensures it isn't case-sensitive
-    # .replace(" ", "") removes accidental spaces
+# 2. The 4-mer function (Crucial: Must be size=4 now!)
+def get_kmers(sequence, size=4):
     clean_seq = sequence.lower().replace(" ", "").strip()
+    if len(clean_seq) < size:
+        return []
     return [clean_seq[x:x+size] for x in range(len(clean_seq) - size + 1)]
 
-user_seq = st.text_input("Enter DNA Sequence (e.g., A, T, G, C):", "")
+user_seq = st.text_input("Enter DNA Sequence (57 chars):", "")
 
 if st.button("Deep AI Analysis"):
-    if len(user_seq.strip()) < 6:
-        st.error("Sequence too short. Please provide at least 6 nucleotides.")
+    # Pre-processing
+    kmers = get_kmers(user_seq)
+    
+    if not kmers:
+        st.error("Sequence too short!")
     else:
-        # Transform the input using the NEW dictionary
-        words = ' '.join(get_kmers(user_seq))
+        words = ' '.join(kmers)
         vectorized_data = cv.transform([words]).toarray()
         
-        # Run the Prediction
+        # Prediction logic
         prediction = model.predict(vectorized_data)
         prob = model.predict_proba(vectorized_data)[0][1] * 100
 
@@ -37,4 +38,3 @@ if st.button("Deep AI Analysis"):
             st.balloons()
         else:
             st.warning(f"❌ NON-PROMOTER ({100-prob:.1f}% Match)")
-            st.info("The AI determined this sequence lacks the necessary biological 'words' to be a switch.")
