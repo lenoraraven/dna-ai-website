@@ -24,7 +24,7 @@ if st.button("Analyze"):
         # Get Probability
         prob = model.predict_proba(vec)[0][1] * 100
         
-        if prob >= 50:
+        if prob >= 40:
             st.success(f"✅ PROMOTER ({prob:.1f}% Match)")
             st.balloons()
         else:
