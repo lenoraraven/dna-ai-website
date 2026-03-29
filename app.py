@@ -1,40 +1,32 @@
 import streamlit as st
 import joblib
 
-# 1. Load the "V6" Balanced Brain and Dictionary
-model = joblib.load('dna_model_6mer.pkl')
-cv = joblib.load('vectorizer_6.pkl')
+# Load the NEW stable files
+model = joblib.load('stable_model.pkl')
+cv = joblib.load('stable_vectorizer.pkl')
 
-st.set_page_config(page_title="DNA Promoter AI", page_icon="🧬")
+st.title("🧬 DNA Promoter Detector (V7-Stable)")
 
-st.title("🧬 Final: Goldilocks DNA Detector")
-st.write("Balanced version: Optimized to find real signals while ignoring junk.")
+def get_kmers(sequence, size=3):
+    clean = sequence.lower().replace(" ", "").strip()
+    return [clean[x:x+size] for x in range(len(clean) - size + 1)]
 
-# 2. The 4-mer function (Crucial: Must be size=4 now!)
-def get_kmers(sequence, size=4):
-    clean_seq = sequence.lower().replace(" ", "").strip()
-    if len(clean_seq) < size:
-        return []
-    return [clean_seq[x:x+size] for x in range(len(clean_seq) - size + 1)]
+user_seq = st.text_input("Enter 57-nucleotide sequence:", "")
 
-user_seq = st.text_input("Enter DNA Sequence (57 chars):", "")
-
-if st.button("Deep AI Analysis"):
-    # Pre-processing
-    kmers = get_kmers(user_seq)
-    
-    if not kmers:
-        st.error("Sequence too short!")
+if st.button("Analyze"):
+    if len(user_seq.strip()) < 50:
+        st.error("Please enter a full sequence.")
     else:
-        words = ' '.join(kmers)
-        vectorized_data = cv.transform([words]).toarray()
+        words = ' '.join(get_kmers(user_seq))
+        vec = cv.transform([words]).toarray()
         
-        # Prediction logic
-        prediction = model.predict(vectorized_data)
-        prob = model.predict_proba(vectorized_data)[0][1] * 100
+        # Get probability
+        prob = model.predict_proba(vec)[0] # [Prob_Negative, Prob_Positive]
+        pos_score = prob[1] * 100
 
-        if prediction[0] == 1:
-            st.success(f"✅ PROMOTER IDENTIFIED ({prob:.1f}% Match)")
+        # Strict Threshold: Must be > 60% confident to be a promoter
+        if pos_score > 60:
+            st.success(f"✅ PROMOTER ({pos_score:.1f}% confidence)")
             st.balloons()
         else:
-            st.warning(f"❌ NON-PROMOTER ({100-prob:.1f}% Match)")
+            st.warning(f"❌ NON-PROMOTER ({100 - pos_score:.1f}% confidence)")
