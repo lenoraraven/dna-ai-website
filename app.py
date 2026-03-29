@@ -3,8 +3,8 @@ import joblib
 
 # 1. Load the "Strict" Final Brain and Dictionary
 # Make sure these filenames match exactly what you uploaded to GitHub!
-model = joblib.load('dna_model_final.pkl')
-cv = joblib.load('vectorizer_final.pkl')
+model = joblib.load('dna_model_v5.pkl')
+cv = joblib.load('vectorizer_v5.pkl')
 
 st.set_page_config(page_title="DNA Promoter AI", page_icon="🧬")
 
