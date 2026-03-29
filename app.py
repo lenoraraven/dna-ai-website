@@ -2,8 +2,8 @@ import streamlit as st
 import joblib
 
 # 1. Load the "V6" Balanced Brain and Dictionary
-model = joblib.load('dna_model_v6.pkl')
-cv = joblib.load('vectorizer_v6.pkl')
+model = joblib.load('dna_model_6mer.pkl')
+cv = joblib.load('vectorizer_6.pkl')
 
 st.set_page_config(page_title="DNA Promoter AI", page_icon="🧬")
 
