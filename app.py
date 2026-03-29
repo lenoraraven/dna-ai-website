@@ -22,11 +22,11 @@ if st.button("Analyze"):
         
         # Get probability
         prob = model.predict_proba(vec)[0] # [Prob_Negative, Prob_Positive]
-        pos_score = prob[1] * 100
+pos_score = prob[1] * 100
 
-        # Strict Threshold: Must be > 60% confident to be a promoter
-        if pos_score > 60:
-            st.success(f"✅ PROMOTER ({pos_score:.1f}% confidence)")
-            st.balloons()
-        else:
-            st.warning(f"❌ NON-PROMOTER ({100 - pos_score:.1f}% confidence)")
+# NEW BALANCED THRESHOLD (50%)
+if pos_score >= 50:
+    st.success(f"✅ PROMOTER IDENTIFIED ({pos_score:.1f}% Match)")
+    st.balloons()
+else:
+    st.warning(f"❌ NON-PROMOTER ({100 - pos_score:.1f}% Match)")
