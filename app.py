@@ -1,49 +1,31 @@
 import streamlit as st
 import joblib
-import numpy as np
 
-# 1. Load the "Pro" Brain and Dictionary
-# Make sure these filenames match exactly what you uploaded to GitHub!
-model = joblib.load('dna_model_pro.pkl')
-cv = joblib.load('vectorizer_pro.pkl')
+# Load the V8 files
+model = joblib.load('dna_brain_v8.pkl')
+cv = joblib.load('vocab_v8.pkl')
 
-st.set_page_config(page_title="DNA Promoter AI: Pro", page_icon="🧬")
+st.title("🧬 DNA Promoter Detector (V8)")
+st.write("Calibrated for the Lac Operon and biological switches.")
 
-st.title("🧬 DNA Promoter Detector (Random Forest)")
-st.write("Professional-grade model trained to ignore repetitive 'Poly-A' and 'CGC' traps.")
-
-# 2. The 3-mer function (Must match the V7/Pro training code)
 def get_kmers(sequence, size=3):
-    clean_seq = sequence.lower().replace(" ", "").strip()
-    if len(clean_seq) < size:
-        return []
-    return [clean_seq[x:x+size] for x in range(len(clean_seq) - size + 1)]
+    clean = sequence.lower().replace(" ", "").strip()
+    return [clean[x:x+size] for x in range(len(clean) - size + 1)]
 
-user_seq = st.text_input("Enter DNA Sequence (57 chars recommended):", "")
+user_input = st.text_input("Enter DNA Sequence:", "")
 
-if st.button("Run Pro Analysis"):
-    # Pre-processing
-    kmers = get_kmers(user_seq)
-    
-    if not kmers:
-        st.error("⚠️ Sequence is too short for analysis! Please enter at least 3 characters.")
+if st.button("Analyze"):
+    if len(user_input) < 10:
+        st.error("Sequence too short!")
     else:
-        # Convert DNA to 'sentence' of 3-mers
-        words = ' '.join(kmers)
-        vectorized_data = cv.transform([words])
+        words = ' '.join(get_kmers(user_input))
+        vec = cv.transform([words]).toarray()
         
-        # 3. Safe Prediction Logic
-        try:
-            # We ask the model for the probability of being a Promoter (Class 1)
-            prob = model.predict_proba(vectorized_data)[0][1] * 100
-
-            # NEW BALANCED THRESHOLD (50%)
-            # This line must be indented exactly 12 spaces (or 3 tabs)
-            if prob >= 50:
-                st.success(f"✅ PROMOTER IDENTIFIED ({prob:.1f}% Match)")
-                st.balloons()
-            else:
-                st.warning(f"❌ NON-PROMOTER ({100 - prob:.1f}% Match)")
-                
-        except Exception as e:
-            st.error(f"Prediction Error: {e}")
+        # Get Probability
+        prob = model.predict_proba(vec)[0][1] * 100
+        
+        if prob >= 50:
+            st.success(f"✅ PROMOTER ({prob:.1f}% Match)")
+            st.balloons()
+        else:
+            st.warning(f"❌ NON-PROMOTER ({100 - prob:.1f}% Match)")
