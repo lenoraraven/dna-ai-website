@@ -1,33 +1,36 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import job iib # Used to save/load the model
+import joblib
+
+# 1. Load the "Brain" you uploaded
+model = joblib.load('dna_model.pkl')
 
 st.title("🧬 Global DNA Promoter Detector")
-st.write("Enter any 57-nucleotide sequence to check for a Promoter switch.")
+st.write("Enter a 57-nucleotide sequence to check for a Promoter switch.")
 
-# 1. The Preprocessing Function
+# 2. The Translator Function
 def preprocess_input(sequence):
-    # Convert string to list of characters
     chars = list(sequence.lower().replace(" ", ""))
-    # Create a DataFrame with the same column structure as training
-    # Note: In a production app, you would use a saved 'Encoder'
-    # For this version, we use a simple mapping for the demo
     mapping = {'a': [1,0,0,0], 'c': [0,1,0,0], 'g': [0,0,1,0], 't': [0,0,0,1]}
     encoded = []
+    # Take only the first 57 characters
     for char in chars[:57]:
         encoded.extend(mapping.get(char, [0,0,0,0]))
     return np.array(encoded).reshape(1, -1)
 
-# 2. The Website Interface
-user_seq = st.text_input("DNA Sequence:", "atgc...")
+# 3. The Website Interface
+user_seq = st.text_input("DNA Sequence (A, T, G, C):", "tactagcaatacgctgcgc...")
 
 if st.button("Run AI Analysis"):
-    if len(user_seq) < 57:
-        st.error("Please enter at least 57 nucleotides.")
+    if len(user_seq.strip()) < 57:
+        st.error(f"Sequence too short! You provided {len(user_seq)} chars, but we need 57.")
     else:
-        # This is where the AI 'thinks'
         processed = preprocess_input(user_seq)
-        # Assuming 'model' is loaded
-        st.success("Analysis Complete!")
-        st.metric("Probability of Promoter", "94%")
+        prediction = model.predict(processed)
+        
+        if prediction[0] == 1:
+            st.success("✅ RESULT: This sequence is a PROMOTER (ON-Switch)")
+            st.balloons()
+        else:
+            st.warning("❌ RESULT: This is NOT a Promoter")
