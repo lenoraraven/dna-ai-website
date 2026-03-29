@@ -34,17 +34,16 @@ if st.button("Run Pro Analysis"):
         
         # 3. Safe Prediction Logic
         try:
-            prediction = model.predict(vectorized_data)[0]
+            # We ask the model for the probability of being a Promoter (Class 1)
             prob = model.predict_proba(vectorized_data)[0][1] * 100
 
-            # We use a 70% confidence threshold for "Pro" mode
-           if prob >= 50:
-                st.success(f"✅ PROMOTER IDENTIFIED ({prob:.1f}% Confidence)")
+            # NEW BALANCED THRESHOLD (50%)
+            # This line must be indented exactly 12 spaces (or 3 tabs)
+            if prob >= 50:
+                st.success(f"✅ PROMOTER IDENTIFIED ({prob:.1f}% Match)")
                 st.balloons()
-                st.info("The AI detected a specific arrangement of regulatory motifs.")
             else:
-                st.warning(f"❌ NON-PROMOTER ({100 - prob:.1f}% Confidence)")
-                st.info("This sequence was flagged as 'Junk' or 'Background DNA'.")
+                st.warning(f"❌ NON-PROMOTER ({100 - prob:.1f}% Match)")
                 
         except Exception as e:
-            st.error(f"Prediction Error: {e}. Please ensure your model and vectorizer match.")
+            st.error(f"Prediction Error: {e}")
