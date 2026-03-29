@@ -2,8 +2,8 @@ import streamlit as st
 import joblib
 
 # Load the NEW stable files
-model = joblib.load('stable_model.pkl')
-cv = joblib.load('stable_vectorizer.pkl')
+model = joblib.load('dna_model_pro.pkl')
+cv = joblib.load('vectorizer_pro.pkl')
 
 st.title("🧬 DNA Promoter Detector (V7-Stable)")
 
@@ -32,8 +32,12 @@ if st.button("Analyze"):
             pos_score = 100.0 if prediction == 1 else 0.0
 
         # 3. Final Result Logic
-        if prediction == 1:
-            st.success(f"✅ PROMOTER IDENTIFIED ({pos_score:.1f}% Confidence)")
-            st.balloons()
-        else:
-            st.warning(f"❌ NON-PROMOTER ({100 - pos_score:.1f}% Confidence)")
+
+prediction = model.predict(vec)[0]
+prob = model.predict_proba(vec)[0][1] * 100
+
+if prediction == 1 and prob > 70: # Notice we raised the bar to 70%!
+    st.success(f"✅ PROMOTER ({prob:.1f}% Match)")
+    st.balloons()
+else:
+    st.warning(f"❌ NON-PROMOTER ({100 - prob:.1f}% Match)")
