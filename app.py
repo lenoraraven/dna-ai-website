@@ -1,21 +1,20 @@
 import streamlit as st
 import joblib
 
-# Load the V8 files
-model = joblib.load('dna_brain_v8.pkl')
-cv = joblib.load('vocab_v8.pkl')
+# Load the FINAL files
+model = joblib.load('dna_final_model.pkl')
+cv = joblib.load('dna_final_vocab.pkl')
 
-st.title("🧬 DNA Promoter Detector (V8)")
-st.write("Calibrated for the Lac Operon and biological switches.")
+st.title("🧬 Professional DNA Promoter AI")
 
 def get_kmers(sequence, size=3):
     clean = sequence.lower().replace(" ", "").strip()
     return [clean[x:x+size] for x in range(len(clean) - size + 1)]
 
-user_input = st.text_input("Enter DNA Sequence:", "")
+user_input = st.text_input("Paste DNA sequence here:", "")
 
-if st.button("Analyze"):
-    if len(user_input) < 10:
+if st.button("Analyze Sequence"):
+    if len(user_input) < 20:
         st.error("Sequence too short!")
     else:
         words = ' '.join(get_kmers(user_input))
@@ -24,8 +23,9 @@ if st.button("Analyze"):
         # Get Probability
         prob = model.predict_proba(vec)[0][1] * 100
         
-        if prob >= 40:
-            st.success(f"✅ PROMOTER ({prob:.1f}% Match)")
+        # The 'Bio-Standard' 35% Threshold
+        if prob >= 35:
+            st.success(f"✅ PROMOTER DETECTED ({prob:.1f}% Signal)")
             st.balloons()
         else:
             st.warning(f"❌ NON-PROMOTER ({100 - prob:.1f}% Match)")
