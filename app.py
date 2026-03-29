@@ -38,7 +38,7 @@ if st.button("Run Pro Analysis"):
             prob = model.predict_proba(vectorized_data)[0][1] * 100
 
             # We use a 70% confidence threshold for "Pro" mode
-            if prediction == 1 and prob >= 70:
+           if prob >= 50:
                 st.success(f"✅ PROMOTER IDENTIFIED ({prob:.1f}% Confidence)")
                 st.balloons()
                 st.info("The AI detected a specific arrangement of regulatory motifs.")
